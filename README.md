@@ -1,36 +1,151 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AMC Management Frontend
+
+A modern, responsive frontend application for AMC (Annual Maintenance Contract) management built with Next.js 16, TypeScript, and shadcn/ui.
+
+## Features
+
+- 🔐 **Authentication** - JWT-based auth with role-based access control
+- 🎨 **Modern UI** - Built with shadcn/ui components
+- 🌓 **Dark/Light Mode** - Theme switching with next-themes
+- 📱 **Fully Responsive** - Mobile, tablet, and desktop support
+- 🔄 **Real-time Updates** - Apollo Client for GraphQL integration
+- 📊 **Dashboard** - Statistics and recent data overview
+- ✏️ **CRUD Operations** - Full create, read, update, delete for all entities
+- 🎯 **Type Safe** - Full TypeScript coverage
+- 🚀 **Fast** - Built on Next.js 16 with App Router
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **UI Components**: shadcn/ui
+- **Styling**: Tailwind CSS
+- **GraphQL Client**: Apollo Client
+- **State Management**: Zustand
+- **Form Handling**: react-hook-form + zod
+- **Theme**: next-themes
+- **Charts**: Recharts
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ installed
+- Backend GraphQL server running
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Create `.env.local` file:
+
+```env
+NEXT_PUBLIC_GRAPHQL_URL=http://localhost:4000/admin/graphql
+```
+
+4. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+├── app/                    # Next.js app directory
+│   ├── (admin)/           # Protected admin routes
+│   ├── login/             # Login page
+│   └── no-access/         # Access denied page
+├── components/            # React components
+│   ├── layout/           # Layout components (sidebar, header)
+│   └── ui/               # shadcn/ui components
+├── graphql/              # GraphQL queries and mutations
+├── lib/                  # Utility functions and configurations
+├── store/                # Zustand state management
+└── types/                # TypeScript type definitions
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Available Pages
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Fully Implemented
+- ✅ Dashboard - Statistics and overview
+- ✅ Brands - Full CRUD operations
+- ✅ Categories - Full CRUD operations
+- ✅ Mail Settings - SMTP configuration
+- ✅ Profile - User profile display
 
-## Deploy on Vercel
+### Placeholder (Need Implementation)
+- 📝 Products - With brand and category associations
+- 📝 Customers - With locations management
+- 📝 Invoices - With invoice items
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Authentication
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The application uses JWT tokens for authentication:
+
+1. Login with email and password
+2. Token stored in localStorage and cookies
+3. Role-based access control (admin/user)
+4. Protected routes via middleware
+
+**Default credentials** (from backend):
+- Check your backend for admin credentials
+
+## Development
+
+### Adding a New Page
+
+1. Create page file in `app/(admin)/your-page/page.tsx`
+2. Add route to sidebar in `components/layout/app-sidebar.tsx`
+3. Create GraphQL queries/mutations in `graphql/`
+4. Add Zustand store if needed in `store/index.ts`
+5. Implement CRUD operations using Apollo Client
+
+### Using shadcn/ui Components
+
+```bash
+npx shadcn@latest add [component-name]
+```
+
+## Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run lint` - Run ESLint
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NEXT_PUBLIC_GRAPHQL_URL` | GraphQL backend endpoint | Yes |
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+MIT
+
+## Support
+
+For support, email your-email@example.com or open an issue in the repository.

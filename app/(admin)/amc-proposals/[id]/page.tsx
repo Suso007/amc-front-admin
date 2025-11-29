@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Pencil, Trash2, RefreshCw, FileText, Mail, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, RefreshCw, FileText, Mail, ExternalLink, FileStack, Inbox } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 
 import {
@@ -63,6 +63,13 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 
 const proposalItemSchema = z.object({
@@ -99,6 +106,8 @@ export default function ProposalDetailsPage() {
     const [isItemDialogOpen, setIsItemDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
+    const [isDocumentsDrawerOpen, setIsDocumentsDrawerOpen] = useState(false);
+    const [isEmailRecordsDrawerOpen, setIsEmailRecordsDrawerOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<ProposalItem | null>(null);
     const [selectedLocationId, setSelectedLocationId] = useState<number | null>(null);
     const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
@@ -157,6 +166,27 @@ export default function ProposalDetailsPage() {
     const locations = (locationsData as any)?.customerLocations?.data || [];
     const invoices = (invoicesData as any)?.invoices?.data || [];
     const invoiceItems = (selectedInvoiceData as any)?.invoice?.items || [];
+
+    const { data: documentsData, refetch: refetchDocuments } = useQuery(GET_PROPOSAL_DOCUMENTS, {
+        variables: {
+            page: 1,
+            limit: 100,
+            proposalno: proposal?.proposalno,
+        },
+        skip: !proposal?.proposalno,
+    });
+
+    const { data: emailRecordsData, refetch: refetchEmailRecords } = useQuery(GET_EMAIL_RECORDS, {
+        variables: {
+            page: 1,
+            limit: 100,
+            proposalno: proposal?.proposalno,
+        },
+        skip: !proposal?.proposalno,
+    });
+
+    const documents = (documentsData as any)?.proposalDocuments?.data || [];
+    const emailRecords = (emailRecordsData as any)?.emailRecords?.data || [];
 
     // Watch for quantity and rate changes to calculate amount
     const watchQuantity = form.watch('quantity');
@@ -408,6 +438,20 @@ export default function ProposalDetailsPage() {
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsDocumentsDrawerOpen(true)}
+                    >
+                        <FileStack className="mr-2 h-4 w-4" />
+                        View Documents
+                    </Button>
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsEmailRecordsDrawerOpen(true)}
+                    >
+                        <Inbox className="mr-2 h-4 w-4" />
+                        Email Records
+                    </Button>
                     <Button
                         variant="outline"
                         onClick={handleGenerateDocument}
@@ -841,6 +885,146 @@ export default function ProposalDetailsPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Proposal Documents Drawer */}
+            <Sheet open={isDocumentsDrawerOpen} onOpenChange={setIsDocumentsDrawerOpen}>
+                <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+                    <SheetHeader>
+                        <SheetTitle>Proposal Documents</SheetTitle>
+                        <SheetDescription>
+                            View all generated documents for proposal {proposal?.proposalno}
+                        </SheetDescription>
+                    </SheetHeader>
+                    <div className="mt-6 space-y-4">
+                        {documents.length > 0 ? (
+                            documents.map((doc: any, index: number) => (
+                                <Card key={doc.id} className="hover:shadow-md transition-shadow">
+                                    <CardHeader className="pb-3">
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <CardTitle className="text-base flex items-center gap-2">
+                                                    <FileText className="h-4 w-4 text-primary" />
+                                                    Document #{index + 1}
+                                                </CardTitle>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    {formatDate(doc.createdat)}
+                                                </p>
+                                            </div>
+                                            <Badge variant="secondary" className="ml-2">
+                                                PDF
+                                            </Badge>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="space-y-2">
+                                        <div className="text-sm">
+                                            <p className="text-muted-foreground text-xs">Proposal Number</p>
+                                            <p className="font-medium">{doc.proposalno}</p>
+                                        </div>
+                                        {doc.createdby && (
+                                            <div className="text-sm">
+                                                <p className="text-muted-foreground text-xs">Created By</p>
+                                                <p className="font-medium">{doc.createdby}</p>
+                                            </div>
+                                        )}
+                                        <Separator className="my-2" />
+                                        <a
+                                            href={doc.doclink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                                        >
+                                            <ExternalLink className="h-3 w-3" />
+                                            View Document
+                                        </a>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-12 text-center">
+                                <FileStack className="h-12 w-12 text-muted-foreground/50 mb-3" />
+                                <p className="text-sm text-muted-foreground">No documents generated yet</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    Click "Generate Proposal" to create a document
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </SheetContent>
+            </Sheet>
+
+            {/* Email Records Drawer */}
+            <Sheet open={isEmailRecordsDrawerOpen} onOpenChange={setIsEmailRecordsDrawerOpen}>
+                <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+                    <SheetHeader>
+                        <SheetTitle>Email Records</SheetTitle>
+                        <SheetDescription>
+                            View all email records for proposal {proposal?.proposalno}
+                        </SheetDescription>
+                    </SheetHeader>
+                    <div className="mt-6 space-y-4">
+                        {emailRecords.length > 0 ? (
+                            emailRecords.map((record: any, index: number) => (
+                                <Card key={record.id} className="hover:shadow-md transition-shadow">
+                                    <CardHeader className="pb-3">
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <CardTitle className="text-base flex items-center gap-2">
+                                                    <Mail className="h-4 w-4 text-primary" />
+                                                    Email #{index + 1}
+                                                </CardTitle>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    {formatDate(record.createdat)}
+                                                </p>
+                                            </div>
+                                            <Badge
+                                                variant={record.status === 'sent' ? 'default' : 'secondary'}
+                                                className="ml-2"
+                                            >
+                                                {record.status}
+                                            </Badge>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="space-y-2">
+                                        <div className="text-sm">
+                                            <p className="text-muted-foreground text-xs">Recipient</p>
+                                            <p className="font-medium break-all">{record.email}</p>
+                                        </div>
+                                        <div className="text-sm">
+                                            <p className="text-muted-foreground text-xs">Proposal Number</p>
+                                            <p className="font-medium">{record.proposalno}</p>
+                                        </div>
+                                        {record.sentby && (
+                                            <div className="text-sm">
+                                                <p className="text-muted-foreground text-xs">Sent By</p>
+                                                <p className="font-medium">{record.sentby}</p>
+                                            </div>
+                                        )}
+                                        {record.message && (
+                                            <>
+                                                <Separator className="my-2" />
+                                                <div className="text-sm">
+                                                    <p className="text-muted-foreground text-xs mb-1">Message</p>
+                                                    <p className="text-sm bg-muted p-2 rounded-md">
+                                                        {record.message}
+                                                    </p>
+                                                </div>
+                                            </>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            ))
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-12 text-center">
+                                <Inbox className="h-12 w-12 text-muted-foreground/50 mb-3" />
+                                <p className="text-sm text-muted-foreground">No email records found</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    Send an email to create a record
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </SheetContent>
+            </Sheet>
         </div>
     );
 }

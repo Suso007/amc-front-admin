@@ -421,7 +421,7 @@ export default function AmcProposalsPage() {
 
             {/* Add/Edit Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="min-w-4xl max-w-5xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>
                             {selectedProposal ? 'Edit Proposal' : 'Add Proposal'}
